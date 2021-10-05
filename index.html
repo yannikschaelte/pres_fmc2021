@@ -1,0 +1,419 @@
+<!doctype html>
+<html>
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>FMC 2021-10-07</title>
+
+    <meta name="description"
+          content="FitMultiCell meeting, 2021-10-07">
+    <meta name="author" content="Yannik Schaelte">
+
+    <link rel="stylesheet" href="reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="reveal.js/dist/theme/white.css" id="theme">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"
+          id="highlight-theme">
+
+    <link rel="stylesheet" href="ystyle.css">
+</head>
+
+
+<body>
+
+<div class="reveal">
+    <div class="slides" id="id_slides">
+
+        <section data-transition="slide-in slide-out">
+            <img src="img/front.svg" alt="Front page"/>
+        </section>
+
+        <!--<section>
+          <img src="img/poster.png" class="r-stretch"/>
+        </section>-->
+
+        <section data-background="#e3003aff" data-background-transition="zoom">
+            <h1>abc</h1>
+        </section>
+
+        <section>
+            <h2>likelihood-free Bayesian inference</h2>
+            <img src="img/bayestheorem_lf.svg"/>
+            <ul>
+                <li>
+                    common optimization and sampling methods (e.g. MCMC) require
+                    the (unnormalized) likelihood
+                </li>
+                <li>
+                    can happen: numerical
+                    <strong>evaluation infeasible</strong></li>
+                <li>
+                    ... but still <strong>possible to simulate data</strong>
+                    $y\sim\pi(y|\theta)$
+                </li>
+            </ul>
+        </section>
+
+        <section>
+          <h2>mini-intro abc</h2>
+          <div style="display: flex">
+            <ul>
+              <li>Approximate Bayesian Computation enables Bayesian inference for
+                $$\pi(\theta|y_\text{obs}) \propto \pi(y_\text{obs}|\theta)\pi(\theta)$$
+                if the likelihood cannot be evaluated
+              </li>
+              <li> until $N$ acceptances:
+                <ol style="display: block">
+                  <li>sample parameters $\theta\sim\pi(\theta)$</li>
+                  <li>simulate data $y\sim\pi(y|\theta)$</li>
+                  <li>accept if $d(s(y), s(y_\text{obs}))\leq\varepsilon$</li>
+                </ol>
+                with summary statistics $s$, distance function $d$
+              </li>
+              <li>often combined with an SMC scheme, $\varepsilon\rightarrow\varepsilon_t, \pi(\theta)\rightarrow g_t(\theta), t=1,\ldots,n_t$</li>
+            </ul>
+            <span>
+              <img src="img/abc_principles-7_vert.svg" width="250px"/>
+            </span>
+          </div>
+        </section>
+
+        <section>
+          <h3>the problem:</h3>
+          <h2>fitting heterogeneous data</h2>
+          <img src="img/dist_sumstat_problem_illustration.svg" class="r-stretch"/>
+        </section>
+
+        <section>
+          ABC results can vary a lot depending on the employed methods
+          <img src="img/figures_learn/figure_motivation.svg" class="r-stretch"/>
+          <h3>how to choose good summary statistics and distance functions?</h3>
+        </section>
+
+        <section data-background="#e3003aff" data-background-transition="zoom">
+            <h1>robust adaptive distances</h1>
+        </section>
+
+        <section>
+          <h2>background: adaptive distances</h2>
+          <img src="img/distance_ellipse.svg" height="100px"/><br/>
+            <!--<img src="img/slowparrot.gif" height="50px"/><img src="img/norm1.png" width="100px"/>
+            <img src="img/ultrafastparrot.gif" height="50px"/><img src="img/norm2.png" width="100px"/>-->
+            <ul>
+              <li>a common distance metric in ABC is a weighted Euclidean distance
+                $$d(y,y_\text{obs}) = \left(\sum_{i_y}(r_{i_y} \cdot (y_{i_y} - y_{{i_y},\text{obs}}))^2\right)^{1/2}$$
+              </li>
+              <li>e.g. $r_{i_y} = \operatorname{Var}[\{y_{i,i_y}\}_{i\geq 1}]^{-1}$ to normalize scales</li>
+              <li>Prangle 2017: in ABC-SMC, updating weights $r^t$ iteratively to adjust to the changed proposal structure improves performance substantially</li>
+            </ul>
+        </section>
+
+        <section>
+          <h2>problems</h2>
+          <img src="img/figures_robust/figure_motivation.pdf.svg" class="r-stretch"/>
+          <ul>
+            <li>can perform badly for high-dimensional problems</li>
+            <li>highly sensitive to outliers</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>solutions</h2>
+          <ul>
+            <li>robust Manhattan norm with bounded variance</li>
+            <li>active online outlier detection and down-weighting by bias assessment,
+              $$r_{i_y} = \mathbb{E}[(y_{i_y} - y_{{i_y},\text{obs}})^2]^{-1} = (\text{Var}(\{y^i_{i_y}\}_{i}) + \text{Bias}(\{y^i_{i_y}\}_{i},y_{{i_y},\text{obs}})^2)^{-1/2}$$
+              (or robust variants based on MAD and MADO)
+            </li>
+            <li>apply bias corection if only few coordinates have large bias </li>
+            <li>yields a widely applicable efficient and robust distance metric</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>theorem (convergence of ABC posterior)</h2>
+          <div style="text-align: left">
+            Consider prior $\pi(\theta)$ and likelihood $\pi(y|\theta)$ densities,
+            with posterior $\pi(\theta|y_\text{obs})\propto \pi(y_\text{obs}|\theta)\pi(\theta)$,
+            and measurable distance metrics $d_t$.
+            Assume that for the acceptance regions
+            $A_t = \{y:d_t(y,y_\text{obs})\leq\varepsilon_t\}$ holds $\lim_{t\rightarrow \infty}|A_t| = 0$,
+            <!--where $\abs{\cdot}$ denotes the Lebesgue measure,-->
+            and that the $A_t$ have bounded eccentricity at $y_\text{obs}$.
+            <!--(also referred to as shrinking regularly to $y_\obs$),
+            i.e.\ there is a constant $c>0$ such that for every $A_t$ there is a
+            ball $B_t$ with $y_\obs\in B_t$, $A_t\subset B_t$,
+            and $\abs{A_t}\geq c \abs{B_t}$.-->
+            Then, for functions $\xi:\mathbb{R}^{n_\theta}\rightarrow\mathbb{R}$ with
+            $\mathbb{E}_{\pi(\theta)}[|\xi|]<\infty$ holds
+            $$
+                 \mathbb{E}_{\pi_{\text{ABC},\varepsilon_t(\theta|y_\text{obs})}}[\xi] \xrightarrow{t\rightarrow\infty}\mathbb{E}_{\pi(\theta|y_\text{obs})}[\xi]\quad\text{for almost-all}~y_\text{obs}.
+            $$
+            <p><em>Proof:</em> Yep.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2>results</h2>
+          <img src="img/figures_robust/figure_rmse_hist.pdf.svg" class="r-stretch"/>
+          accurate results on various problem types, on outlier-free and outlier-corrupted data
+        </section>
+
+        <section>
+          <img src="img/figures_robust/figure_fits_and_weights.pdf.svg" class="r-stretch"/>
+          good data fits and reliable outlier down-weighting
+        </section>
+
+        <section>
+            <h3>application example M6: tumor growth</h3>
+            <small>based on Jagiella et al., Cell Systems 2017</small>
+            <img src="img/dividing_bg_transparent_small.gif" class="stretch"
+                 alt="Tumor gif"/>
+            <ul>
+                <li>cells modeled as interacting stochastic agents, dynamics of
+                    extracellular substances by PDEs
+                </li>
+                <li>simulate up to 10<sup>6</sup> cells</li>
+                <li>10s - 1h for one forward simulation</li>
+                <li>7-18 parameters</li>
+            </ul>
+        </section>
+
+        <section>
+          <img src="img/figures_robust/figure_tumor_kdes_hist.pdf.svg" class="r-stretch"/>
+          better parameter estimates compared to established methods, also on outlier-free data
+        </section>
+
+        <section>
+          <img src="img/figures_robust/figure_tumor_fits_and_weights_0.1_hist.pdf.svg"/>
+          good data fits and reliable outlier down-weighting
+        </section>
+
+        <!--<section>
+          <img src="img/figures_robust/figure_tumor_fits_and_weights_0_hist.pdf.svg"/>
+          also preferable on outlier-free data
+        </section>-->
+
+        <section data-background="#e3003aff" data-background-transition="zoom">
+            <h1>informative distances and summary statistics</h1>
+        </section>
+
+        <section>
+          <h2>background: regression-based summary statistics</h2>
+          <div class="r-stack">
+            <img src="img/predictor_0.svg"/>
+            <img src="img/predictor_1.svg" class="fragment"/>
+          </div>
+        </section>
+
+        <section>
+          <h2>background: regression-based summary statistics</h2>
+          <img src="img/model_y_theta.svg" height="100px"/>
+          <ul>
+            <li>Fearnhead et al. 2012: Good statistics are $s(y) = \mathbb{E}[\theta|y]$</li>
+            <li>use a linear approximation $\mathbb{E}[\theta|y] \approx s(y) = Ay + b$</li>
+            <li>learn model $s: y\mapsto\theta$ from calibration samples, with
+              (augmented) data as features, and parameters as targets</li>
+            <li>alternative regression models: Ridge (Blum et al. 2013), NN (Jiang et al. 2017),
+              GP (Borowska et al. 2020)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>problems</h2>
+          <ul>
+            <li>scale-normalized distances alone do not account for informativeness</li>
+            <li>identification of a high-density region for training</li>
+            <li>the same problems motivating adaptive distances apply, shifted to "parameter" space</li>
+            <li>parameter non-identifiability problematic for regression models</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>solutions</h2>
+          <ul>
+            <li>combine regression-based summary statistics with scale-normalized weights</li>
+            <li>integrate summary statistics learning in ABC-SMC workflow</li>
+            <li>regression-based sensitivity distance weights as an alternative way of incorporating informativeness</li>
+            <li>employ higher-order moments as regression targets to tackle non-identifiability</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>regression-based sensitivity distance weights</h2>
+          idea: employ regression model $s:y\mapsto\theta$ not to construct summary statistics, but to define <em>sensitivity weights</em>
+          \begin{equation}\label{eq:info_weight}
+    q_{i_y} = \sum_{i_\theta=1}^{n_\theta} \frac{\left|S_{i_yi_\theta}\right|}{ \sum_{j_y=1}^{n_y}\left|S_{j_yi_\theta}\right|},
+\end{equation}
+          as the sum of the absolute sensitivities of all parameters with respect to model output $i_y$, normalized per parameter, where
+          \begin{equation}\label{eq:info_S}
+S = \nabla_y s(y_\text{obs})\in\mathbb{R}^{n_y \times n_\theta}
+\end{equation}
+        </section>
+
+        <section>
+          <h2>theorem (optimal summary statistics)</h2>
+
+          <div style="text-align: left">
+            [...] Given $\lambda:\mathbb{R}^{n_\theta}\rightarrow\mathbb{R}^{n_\lambda}$ such that $\mathbb{E}_{\pi(\theta)}[|\lambda(\theta)|]<\infty$, define summary statistics as the conditional expectation
+            $$s(y) := \mathbb{E}[\lambda(\Theta)|Y=y] = \int \lambda(\theta)\pi(\theta|y)d\theta.$$
+            Then, it holds
+            $\left\lVert{\mathbb{E}_{\pi_{\text{ABC},\varepsilon}}[\lambda(\Theta)|s(y_\text{obs})] - s(y_\text{obs})}\right\rVert \leq \varepsilon$,
+            and therefore
+            \begin{equation}\label{eq:sreg_conv}
+            \lim_{\varepsilon\rightarrow 0}\mathbb{E}_{\pi_{\text{ABC},\varepsilon}}[\lambda(\Theta)|s(y_\text{obs} )] = \mathbb{E}[\lambda(\Theta)|Y=y_\text{obs}].
+            \end{equation}
+            <p><em>Proof:</em> Yep.</p>
+
+            In practice: Use regression model $s: y \mapsto \lambda(\theta) = (\theta^1,\ldots,\theta^k)$.
+          </div>
+        </section>
+
+        <section>
+          <h2>implementation</h2>
+          <img src="img/pyabc_logo.svg" height="100px"/><br/>
+          <pre><code class="python">
+  from pyabc import *
+
+  distance: Distance = AdaptivePNormDistance(
+      sumstat=ModelSelectionPredictorSumstat(
+          predictors=[
+              LinearPredictor(),
+              GPPredictor(kernel=['RBF', 'WhiteKernel']),
+              MLPPredictor(hidden_layer_sizes=(50, 50, 50)),
+          ],
+      ),
+      scale_function=rmse,
+      pre=[lambda x: x, lambda x: x**2],
+      par_trafo=[lambda y: y, lambda y: y**2],
+  )
+          </code></pre>
+          <a href="https://github.com/icb-dcm/pyabc">https://github.com/icb-dcm/pyabc</a>
+        </section>
+
+        <section>
+          <h2>&#129409; a boss model</h2>
+          <ul>
+            <li>$y_1\sim\mathcal{N}(\theta_1,0.1^2)$ is informative of $\theta_1$, with a relatively wide corresponding prior $\theta_1\sim U[-7, 7]$,</li>
+            <li>$y_2\sim\mathcal{N}(\theta_2,100^2)$ is informative of $\theta_2$, with corresponding prior $\theta_2\sim U[-700, 700]$,</li>
+            <li>$y_3\sim\mathcal{N}(\theta_3, 4 \cdot 100^2)^{\otimes 4}$ is a four-dimensional vector informative of $\theta_3$, with corresponding prior $\theta_3\sim U[-700, 700]$,</li>
+            <li>$y_4\sim\mathcal{N}(\theta_4^2, 0.1^2)$ is informative of $\theta_4$, with corresponding symmetric prior $\theta_4\sim U[-1, 1]$, however is quadratic in the parameter, resulting in a bimodal posterior distribution for $y_{\text{obs},4}\neq 0$,</li>
+            <li>$y_5\sim\mathcal{N}(0, 10)^{\otimes 10}$ is an uninformative 10-dimensional vector.</li>
+          </ul>
+        </section>
+
+        <section>
+          <img src="img/figures_learn/figure_demo.pdf.svg" class="r-stretch"/>
+          only combination of scale normalization, informativeness assessment, and regression target augmentation permits accurate inference
+        </section>
+
+        <section>
+          <div class="r-stretch">
+          <img src="img/figures_learn/figure_demo_sankey_Lin.png"/>
+          <img src="img/figures_learn/figure_demo_sankey_MLP2.png"/>
+        </div>
+        sensitivity analysis permits further insights
+        </section>
+
+        <section>
+          <img src="img/figures_learn/figure_rmse_useall.pdf.svg" class="r-stretch"/>
+          especially sensitivity weights widely, robustly applicable; restriction to high-density region preferable
+        </section>
+
+        <section>
+          <img src="img/figures_learn/figure_tumor_kdes.pdf.svg" class="r-stretch"/>
+          sensitivity-weighting improves estimates on application problem substantially
+        </section>
+
+        <section>
+          <img src="img/figures_learn/figure_tumor_fits_and_weights_0.png" class="r-stretch"/>
+          sensitivity weights re-prioritize data points, in particular identifying uninformative ones
+        </section>
+
+        <section>
+          <img src="img/figures_learn/figure_tumor_fits_and_weights_0.1.png" class="r-stretch"/>
+          applicable to outlier-corrupted data
+        </section>
+
+        <section data-background="#e3003aff" data-background-transition="zoom"
+                 data-auto-animate>
+          <h1>discussion</h1>
+        </section>
+
+        <section data-auto-animate>
+          <h1>discussion</h1>
+          <!--<img src="img/concept_informative_robust.svg" height="50px"/>-->
+          <div style="text-align: left">
+            <h4>summary</h4>
+            <p>
+              <ul>
+                <li>accounting for both scale and informativeness often useful</li>
+                <li>provided two approaches using regression-based summary statistics and distance weights,
+                  with scale normalization and addressing parameter non-identifiability</li>
+                </li>
+                <li>robustly applicable also to outlier-corrupted data</li>
+              </ul>
+            </p>
+            <p>
+              <h4>outlook</h4>
+              <ul>
+                <li>model selection and alternative regression models</li>
+                <li>training specification and assessment</li>
+                <li>maybe a goal: fully integrated reliable workflow</li>
+                <li>...</li>
+              </ul>
+            </p>
+          </div>
+        </section>
+
+        <section data-background="img/group.jpg">
+            <div style="background-color: #ffffff99; text-align: left; padding: 30px;">
+                <h3>acknowledgments</h3>
+                Thanks to: Jan Hasenauer, Emad
+                Alamoudi, Elba Raimúndez, the whole lab, ...
+                <img src="img/ack.png"/>
+            </div>
+        </section>
+
+
+        <section data-background-image="img/questions.jpg"
+                 data-background-opacity="0.3">
+            <h1>thx! qs?</h1>
+        </section>
+
+    </div>
+</div>
+
+
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal.js/plugin/zoom/zoom.js"></script>
+<script src="reveal.js/plugin/notes/notes.js"></script>
+<script src="reveal.js/plugin/markdown/markdown.js"></script>
+<script src="reveal.js/plugin/highlight/highlight.js"></script>
+<script src="reveal.js/plugin/math/math.js"></script>
+<script>
+// More info about initialization & config:
+// - https://revealjs.com/initialization/
+// - https://revealjs.com/config/
+Reveal.initialize({
+    controls: true,
+    progress: true,
+    center: true,
+    hash: true,
+
+    // Learn about plugins: https://revealjs.com/plugins/
+    plugins: [ RevealMarkdown, RevealHighlight, RevealNotes,
+               RevealMath, RevealZoom ]
+});
+Reveal.configure({ slideNumber: 'c/t' });
+Reveal.configure({ showSlideNumber: 'all' });
+
+</script>
+</body>
+</html>
