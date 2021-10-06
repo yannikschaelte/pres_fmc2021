@@ -64,9 +64,9 @@
           <h2>mini-intro abc</h2>
           <div style="display: flex">
             <ul>
-              <li>Approximate Bayesian Computation enables Bayesian inference for
+              <li>approximate Bayesian computation enables Bayesian inference for
                 $$\pi(\theta|y_\text{obs}) \propto \pi(y_\text{obs}|\theta)\pi(\theta)$$
-                if the likelihood cannot be evaluated
+                even if the likelihood cannot be evaluated
               </li>
               <li> until $N$ acceptances:
                 <ol style="display: block">
@@ -76,7 +76,7 @@
                 </ol>
                 with summary statistics $s$, distance function $d$
               </li>
-              <li>often combined with an SMC scheme, $\varepsilon\rightarrow\varepsilon_t, \pi(\theta)\rightarrow g_t(\theta), t=1,\ldots,n_t$</li>
+              <li>often combined with an SMC scheme, $\varepsilon\rightarrow\varepsilon_t$, $\pi(\theta)\rightarrow g_t(\theta)$, $d\rightarrow d_t$, $t=1,\ldots,n_t$</li>
             </ul>
             <span>
               <img src="img/abc_principles-7_vert.svg" width="250px"/>
@@ -97,7 +97,8 @@
         </section>
 
         <section data-background="#e3003aff" data-background-transition="zoom">
-            <h1>robust adaptive distances</h1>
+          vol. 1
+          <h1>robust adaptive distances</h1>
         </section>
 
         <section>
@@ -124,8 +125,8 @@
           <h2>problems</h2>
           <img src="img/figures_robust/figure_motivation.pdf.svg" class="r-stretch"/>
           <ul>
-            <li>can perform badly for high-dimensional problems</li>
             <li>highly sensitive to outliers</li>
+              <li>can perform badly for high-dimensional problems</li>
           </ul>
         </section>
 
@@ -134,7 +135,7 @@
           <ul>
             <li>robust Manhattan norm with bounded variance</li>
             <li>active online outlier detection and down-weighting by bias assessment,
-              $$r_{i_y} = \mathbb{E}[(y_{i_y} - y_{{i_y},\text{obs}})^2]^{-1} = (\text{Var}(\{y^i_{i_y}\}_{i}) + \text{Bias}(\{y^i_{i_y}\}_{i},y_{{i_y},\text{obs}})^2)^{-1/2}$$
+              $$r_{i_y} = \mathbb{E}[(y_{i_y} - y_{{i_y},\text{obs}})^2]^{-1} = (\text{Var}[\{y^i_{i_y}\}_{i}] + \text{Bias}[\{y^i_{i_y}\}_{i},y_{{i_y},\text{obs}}]^2)^{-1/2}$$
               (or robust variants based on MAD and MADO)
             </li>
             <li>apply bias corection if only few coordinates have large bias </li>
@@ -185,9 +186,8 @@
                 <li>cells modeled as interacting stochastic agents, dynamics of
                     extracellular substances by PDEs
                 </li>
-                <li>simulate up to 10<sup>6</sup> cells</li>
-                <li>10s - 1h for one forward simulation</li>
-                <li>7-18 parameters</li>
+                <li>simulation time on the order of seconds</li>
+                <li>7 parameters</li>
             </ul>
         </section>
 
@@ -207,7 +207,8 @@
         </section>-->
 
         <section data-background="#e3003aff" data-background-transition="zoom">
-            <h1>informative distances and summary statistics</h1>
+          vol. 2
+          <h1>informative distances and summary statistics</h1>
         </section>
 
         <section>
@@ -226,7 +227,7 @@
             <li>use a linear approximation $\mathbb{E}[\theta|y] \approx s(y) = Ay + b$</li>
             <li>learn model $s: y\mapsto\theta$ from calibration samples, with
               (augmented) data as features, and parameters as targets</li>
-            <li>alternative regression models: Ridge (Blum et al. 2013), NN (Jiang et al. 2017),
+            <li>alternative regression models: DNN (Jiang et al. 2017),
               GP (Borowska et al. 2020)</li>
           </ul>
         </section>
