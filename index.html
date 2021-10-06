@@ -101,17 +101,23 @@
         </section>
 
         <section>
-          <h2>background: adaptive distances</h2>
-          <img src="img/distance_ellipse.svg" height="100px"/><br/>
-            <!--<img src="img/slowparrot.gif" height="50px"/><img src="img/norm1.png" width="100px"/>
-            <img src="img/ultrafastparrot.gif" height="50px"/><img src="img/norm2.png" width="100px"/>-->
+          <div>
+            <h2>background: adaptive distances</h2>
+          </div>
+          <div>
+          <img src="img/slowparrot.gif" height="50px"/><img src="img/norm1.svg" width="100px"/>
+            <img src="img/distance_ellipse.svg" height="100px"/>
+            <img src="img/ultrafastparrot.gif" height="50px"/><img src="img/norm2.svg" width="100px"/>
             <ul>
               <li>a common distance metric in ABC is a weighted Euclidean distance
                 $$d(y,y_\text{obs}) = \left(\sum_{i_y}(r_{i_y} \cdot (y_{i_y} - y_{{i_y},\text{obs}}))^2\right)^{1/2}$$
               </li>
-              <li>e.g. $r_{i_y} = \operatorname{Var}[\{y_{i,i_y}\}_{i\geq 1}]^{-1}$ to normalize scales</li>
-              <li>Prangle 2017: in ABC-SMC, updating weights $r^t$ iteratively to adjust to the changed proposal structure improves performance substantially</li>
+              <li>e.g. $r_{i_y} = \operatorname{Var}[\{y_{i,i_y}\}_{i\geq 1}]^{-1}$
+                to normalize scales</li>
+              <li>Prangle 2017: in ABC-SMC, updating weights $r^t$ iteratively
+                to adjust to the changed proposal structure improves performance substantially</li>
             </ul>
+          </div>
         </section>
 
         <section>
@@ -348,7 +354,6 @@ S = \nabla_y s(y_\text{obs})\in\mathbb{R}^{n_y \times n_\theta}
 
         <section data-auto-animate>
           <h1>discussion</h1>
-          <!--<img src="img/concept_informative_robust.svg" height="50px"/>-->
           <div style="text-align: left">
             <h4>summary</h4>
             <p>
